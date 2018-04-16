@@ -27,12 +27,24 @@
 .path.rfmt <- function() {
   system.file("python", "rfmt.py", package = "rfmt")
 }
+.path.python <- function()
+	getOption('python_path',
+			  stop('Please define the path to Python (the `python_path` option), e.g.:\n',
+			  	 'options(python_path = "C:/Python27/python.exe")',
+			  	 call.=FALSE))
 
 .call.rfmt <- function(opts, source.files) {
-  all.opts <- .new.rfmt.opts(opts)
-  py.opts <- sprintf("--%s=%s", 
-      gsub(".", "_", names(all.opts), fixed = TRUE), unlist(all.opts))
-  system2("python", c(shQuote(.path.rfmt()), py.opts, source.files))
+	all.opts <- .new.rfmt.opts(opts)
+	py.opts <- paste(sprintf("--%s=%s", 
+							 gsub(".", "_", names(all.opts), fixed = TRUE), unlist(all.opts)),
+					 collapse=" ")
+	.python <- .path.python()
+	lapply(source.files,
+		   function(x)
+		   	system(paste(.python,
+		   				 shQuote(.path.rfmt()),
+		   				 py.opts,
+		   				 x)))
 }
 
 #' Set or retrieve options relating to the \code{rfmt} formatter.
